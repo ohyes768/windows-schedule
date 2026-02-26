@@ -1,0 +1,28 @@
+# 抖音收藏视频采集任务配置
+id: "douying_collect"
+name: "抖音视频采集"
+description: "每天定时采集抖音收藏视频并转文字"
+enabled: true
+
+# Cron 表达式：每天凌晨 2 点执行
+cron: "0 2 * * *"
+
+# 项目配置
+project_path: "F:/github/person_project/douyin-collector"
+venv_path: "F:/github/person_project/douyin-collector/.venv"
+working_dir: "F:/github/person_project/douyin-collector"
+
+# 执行配置
+script: "main.py"
+args:
+  - "--max-count"
+  - "50"
+  - "--days-end"
+  - "1"
+
+# 环境变量（可选）
+env: {}
+
+# 重试配置
+max_retries: 3
+retry_delay: 60
