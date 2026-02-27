@@ -4,8 +4,8 @@ name: "抖音视频采集"
 description: "每天定时采集抖音收藏视频并转文字"
 enabled: true
 
-# Cron 表达式：每小时执行一次
-cron: "0 * * * *"
+# Cron 表达式：周一到周五每天 8:30 执行
+cron: "30 8 * * 1-5"
 
 # 项目配置
 project_path: "F:/github/person_project/douyin-collector"
@@ -21,8 +21,9 @@ args:
   - "1"
 
 # 环境变量（可选）
-env: {}
+env:
+  PLAYWRIGHT_BROWSERS_PATH: "C:\\Users\\Administrator\\AppData\\Local\\ms-playwright"
 
 # 重试配置
-max_retries: 3
+max_retries: 0
 retry_delay: 60
