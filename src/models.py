@@ -1,6 +1,6 @@
 """数据模型定义"""
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 @dataclass
@@ -12,7 +12,8 @@ class TaskConfig:
     enabled: bool = True         # 是否启用
 
     # 调度配置
-    cron: str = ""               # Cron 表达式
+    cron: str = ""               # Cron 表达式（单个）
+    crons: Optional[List[str]] = None  # Cron 表达式列表（多个执行时间）
 
     # 执行配置
     project_path: str = ""       # 项目路径

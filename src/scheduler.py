@@ -68,40 +68,56 @@ class SchedulerService:
         logger.info(f"任务执行完成: {task.name}")
         logger.info("=" * 60)
 
+    def _parse_cron(self, cron_expr: str) -> tuple:
+        """解析 Cron 表达式"""
+        cron_parts = cron_expr.split()
+        if len(cron_parts) != 5:
+            raise ValueError(f"Cron 表达式格式错误: {cron_expr}")
+        minute, hour, day, month, day_of_week = cron_parts
+        return minute, hour, day, month, day_of_week
+
     def add_task(self, task: TaskConfig):
         """添加任务到调度器"""
         if not task.enabled:
             logger.info(f"任务 {task.id} 已禁用，跳过")
             return
 
-        cron_parts = task.cron.split()
-        if len(cron_parts) != 5:
-            logger.error(f"任务 {task.id} 的 Cron 表达式格式错误: {task.cron}")
-            return
+        # 支持多个 cron 表达式
+        cron_list = task.crons if task.crons else [task.cron]
 
-        minute, hour, day, month, day_of_week = cron_parts
+        for idx, cron_expr in enumerate(cron_list):
+            try:
+                minute, hour, day, month, day_of_week = self._parse_cron(cron_expr)
 
-        self.scheduler.add_job(
-            self._execute_task,
-            CronTrigger(minute=minute, hour=hour, day=day, month=month, day_of_week=day_of_week),
-            id=task.id,
-            name=task.name,
-            args=[task]
-        )
+                # 如果有多个 cron，给 job id 添加后缀
+                job_id = task.id if len(cron_list) == 1 else f"{task.id}_{idx}"
 
-        logger.info(f"已添加任务: {task.name} ({task.cron})")
+                self.scheduler.add_job(
+                    self._execute_task,
+                    CronTrigger(minute=minute, hour=hour, day=day, month=month, day_of_week=day_of_week),
+                    id=job_id,
+                    name=task.name,
+                    args=[task]
+                )
+
+                logger.info(f"已添加任务: {task.name} ({cron_expr})")
+            except ValueError as e:
+                logger.error(f"任务 {task.id} 配置错误: {e}")
 
     def start(self):
         """启动调度服务"""
         tasks = self.loader.load_all()
 
+        job_count = 0
         for task in tasks:
+            cron_list = task.crons if task.crons else [task.cron]
+            job_count += len(cron_list) if task.enabled else 0
             self.add_task(task)
 
         self.scheduler.start()
         logger.info("=" * 60)
         logger.info("Python Task Scheduler 已启动")
-        logger.info(f"已加载 {len(tasks)} 个定时任务")
+        logger.info(f"已加载 {len(tasks)} 个任务配置，共 {job_count} 个定时任务")
         logger.info("=" * 60)
 
         jobs = self.scheduler.get_jobs()
@@ -142,7 +158,9 @@ async def main():
         for task in tasks:
             status = "启用" if task.enabled else "禁用"
             print(f"[{status}] {task.name} ({task.id})")
-            print(f"  Cron: {task.cron}")
+            cron_list = task.crons if task.crons else [task.cron]
+            for cron in cron_list:
+                print(f"  Cron: {cron}")
             print(f"  项目: {task.project_path}")
             print(f"  脚本: {task.script}")
             print()
