@@ -1,13 +1,12 @@
-# 抖音收藏视频采集任务配置
-id: "douying_collect"
-name: "抖音视频采集"
-description: "每天定时采集抖音收藏视频并转文字"
+# 抖音已读文件清理任务配置
+id: "douyin_read_files_cleaner"
+name: "抖音已读文件清理"
+description: "每天定时清理 file-system-go 中 7 天前的已读文件"
 enabled: true
 
-# Cron 表达式列表：每天 9:30 和 17:00 执行
+# Cron 表达式列表：每天 10:10 执行
 crons:
-  - "30 9 * * *"   # 每天 9:30
-  - "0 17 * * *"   # 每天 17:00
+  - "10 10 * * *"   # 每天 10:10
 
 # 项目配置
 project_path: "F:/github/person_project/douyin-collector"
@@ -15,6 +14,7 @@ venv_path: "F:/github/person_project/douyin-collector/.venv"
 working_dir: "F:/github/person_project/douyin-collector"
 
 # 执行配置
+script: "clean_read_files.py"
 
 # 环境变量（可选）
 env:
