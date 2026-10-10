@@ -1,0 +1,29 @@
+# 每日工作日报任务配置
+id: "daily_review"
+name: "每日工作日报"
+description: "18:05 发送日报，23:50 有晚间新增工作才补发全日版到钉钉和 RSS"
+enabled: true
+
+# Cron 表达式：每天 18:05（白天汇总）+ 23:50（全天汇总）
+crons:
+  - "5 18 * * *"
+  - "50 23 * * *"
+
+# 项目配置（daily-review 零第三方依赖，无 venv，执行器自动回退到调度器 Python）
+project_path: "F:/personal-projects/daily-review"
+working_dir: "F:/personal-projects/daily-review"
+
+# 执行配置
+script: "F:/github/person_project/windows-schedule/scripts/daily_review_scheduled.py"
+args: ["--push"]
+
+# 环境变量
+# USERPROFILE：服务以 LocalSystem 运行，Path.home() 默认指向 systemprofile，
+# 必须显式指回真实用户目录，否则找不到 ~/.claude 会话记录
+env:
+  PYTHONUTF8: "1"
+  USERPROFILE: "C:/Users/Administrator"
+
+# 重试配置（失败 2 分钟后重试一次）
+max_retries: 1
+retry_delay: 120
